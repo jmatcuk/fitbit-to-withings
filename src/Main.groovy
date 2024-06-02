@@ -1,20 +1,22 @@
 import groovy.json.JsonSlurper
 
+
+
+
+
 static void main(String[] args) {
 
   println "Hello world!"
-
-  ArrayList jsonCollection = []
 
   // Specify the starting directory for the scan
   def startDir = new File(args[0])
 
   processDirectory(startDir)
 
-  println "Found ${jsonCollection.size()} JSON files."
+  println "Found ${Globals.jsonCollection.size()} JSON files."
 
 // Access and process data within the collection
-  jsonCollection.each { map ->
+  Globals.jsonCollection.each { map ->
     println "Data: ${map}" // You can access individual elements from the map here
 
   }
@@ -24,10 +26,10 @@ def processDirectory(File dir) {
   dir.eachFile { file ->
     if (file.isDirectory()) {
       processDirectory(file) // Recursively call for subdirectories
-    } else if (file.name.endsWith('.json')) {
+    } else if (file.name.endsWith(Globals.jsonExtension)) {
       // Parse JSON and convert to desired structure
       def jsonData = new JsonSlurper().parse(file)
-      jsonCollection << convertJsonToMap(jsonData) // Add parsed data to collection
+      Globals.jsonCollection << convertJsonToMap(jsonData) // Add parsed data to collection
     }
   }
 }
@@ -41,3 +43,7 @@ static def convertJsonToMap(data) {
   return map
 }
 
+class Globals {
+  static String jsonExtension = '.json'
+  static ArrayList jsonCollection = []
+}
