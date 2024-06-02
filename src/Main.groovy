@@ -13,7 +13,7 @@ static void main(String[] args) {
 
   processDirectory(startDir)
 
-  println "Found ${Globals.jsonCollection.size()} JSON files."
+  println "Found ${Globals.jsonCollection.size()} weight entries."
 
 // Access and process data within the collection
   Globals.jsonCollection.each { map ->
@@ -35,11 +35,31 @@ def processDirectory(File dir) {
 }
 
 // This method can be customized to fit your specific JSON structure
-static def convertJsonToMap(data) {
-  // Modify this logic to extract desired data and create your map structure
+//static def convertJsonToMap(data) {
+//  // Modify this logic to extract desired data and create your map structure
+//  def map = [:]
+//  // Example: Extract key-value pairs from the first level of the JSON object
+//  data.each { key, value -> map[key] = value }
+//  return map
+//}
+
+def convertJsonToMap(data) {
   def map = [:]
-  // Example: Extract key-value pairs from the first level of the JSON object
-  data.each { key, value -> map[key] = value }
+  try {
+    // Attempt to iterate through data as a map
+    data.each { key, value -> map[key] = value }
+  } catch (MissingMethodException e) {
+    // Handle cases where data isn't a map
+    if (data instanceof List) {
+      // If data is a list, iterate through its elements
+        for (item in data) {
+          Globals.jsonCollection << convertJsonToMap(item)
+        } // Recursively convert list elements
+    } else {
+      // Handle other data types (optional - customize based on your needs)
+      println "Skipping non-map/list data: ${data}"
+    }
+  }
   return map
 }
 
