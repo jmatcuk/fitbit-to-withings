@@ -42,13 +42,14 @@ static void main(String[] args) {
       weightValue.bmi = map[WeightKeys.bmi]
     }
     //Unique Keys: [date, fat, weight, logId, time, source, bmi] across all of the json files.
-    weightValues.add(weightValue)
+    Globals.weightValues.add(weightValue)
   }
 
   def allKeys = new HashSet<String>()
 
   Globals.jsonCollection.each { map ->
-    allKeys.addAll(map.keySet()) // Add all keys from each map to the set
+      //noinspection GroovyAssignabilityCheck
+      allKeys.addAll(map.keySet()) // Add all keys from each map to the set
   }
 
   def uniqueKeys = allKeys.toList().unique() // Convert set to list and get unique elements
@@ -56,6 +57,12 @@ static void main(String[] args) {
   println "Unique Keys: ${uniqueKeys}"
 
   println WeightKeys.toCsv()
+
+  println Globals.weightValues.size()
+
+  for (WeightValue weightValue in Globals.weightValues) {
+    println weightValue.toCsv()
+  }
 
 }
 
@@ -84,7 +91,8 @@ def convertJsonToMap(data) {
   def map = [:]
   try {
     // Attempt to iterate through data as a map
-    data.each { key, value -> map[key] = value }
+    data.each { key, value -> //noinspection GroovyAssignabilityCheck
+        map[key] = value }
   } catch (ignored) {
     // Handle cases where data isn't a map
     if (data instanceof List) {
@@ -118,23 +126,23 @@ class WeightKeys {
   static String fat = 'fat'
   static String source = 'source'
 
-    static String toCsv() {
+  static String toCsv() {
     // Build the CSV string with property values separated by commas
     return "${logId}, ${date}, ${time}, ${weight}, ${bmi}, ${fat}, ${source}"
   }
 }
 
 class WeightValue {
-  String logId = ""
-  String date = ""
-  String time = ""
-  String weight = ""
-  String bmi = ""
-  String fat = ""
-  String source = ""
+  String logId = ''
+  String date = ''
+  String time = ''
+  String weight = ''
+  String bmi = ''
+  String fat = ''
+  String source = ''
 
-  static String toCsv() {
+  String toCsv() {
     // Build the CSV string with property values separated by commas
-    return "${logId}, ${date}, ${time}, ${weight}, ${bmi}, ${fat}, ${source}"
+    return "${this.logId}, ${this.date}, ${this.time}, ${this.weight}, ${this.bmi}, ${this.fat}, ${this.source}"
   }
 }
