@@ -10,36 +10,40 @@ static void main(String[] args) {
 
   // Specify the starting directory for the scan
   def startDir = new File(args[0])
+  def csvFile = args[1]
+
+  // Use System property for platform-specific line separator
+  def lineSeparator = System.getProperty("line.separator")
 
   processDirectory(startDir)
 
   println "Found ${Globals.jsonCollection.size()} weight entries."
 
-// Access and process data within the collection
+  // Access and process data within the collection
   Globals.jsonCollection.each { map ->
     println "Data: ${map}" // You can access individual elements from the map here
     weightValue = new WeightValue()
 
     if(map.containsKey(WeightKeys.date)) {
-      weightValue.date = map[WeightKeys.date]
+      weightValue.date = map[WeightKeys.date].toString().trim()
     }
     if(map.containsKey(WeightKeys.fat)) {
-      weightValue.fat = map[WeightKeys.fat]
+      weightValue.fat = map[WeightKeys.fat].toString().trim()
     }
     if(map.containsKey(WeightKeys.weight)) {
-      weightValue.weight = map[WeightKeys.weight]
+      weightValue.weight = map[WeightKeys.weight].toString().trim()
     }
     if(map.containsKey(WeightKeys.logId)) {
-      weightValue.logId = map[WeightKeys.logId]
+      weightValue.logId = map[WeightKeys.logId].toString().trim()
     }
     if(map.containsKey(WeightKeys.time)) {
-      weightValue.time = map[WeightKeys.time]
+      weightValue.time = map[WeightKeys.time].toString().trim()
     }
     if(map.containsKey(WeightKeys.source)) {
-      weightValue.source = map[WeightKeys.source]
+      weightValue.source = map[WeightKeys.source].toString().trim()
     }
     if(map.containsKey(WeightKeys.bmi)) {
-      weightValue.bmi = map[WeightKeys.bmi]
+      weightValue.bmi = map[WeightKeys.bmi].toString().trim()
     }
     //Unique Keys: [date, fat, weight, logId, time, source, bmi] across all of the json files.
     Globals.weightValues.add(weightValue)
@@ -63,6 +67,28 @@ static void main(String[] args) {
   for (WeightValue weightValue in Globals.weightValues) {
     println weightValue.toCsv()
   }
+
+  def writer
+  try {
+    // Open the file for writing with platform-specific line endings
+    writer = new FileWriter(csvFile).newPrintWriter()
+
+    // Write the header row (optional)
+    writer.write(WeightKeys.toCsv() + lineSeparator)
+
+    // Write each line to the CSV file with commas as separators
+    Globals.weightValues.each { weight ->
+      writer.write(weight.toCsv() + lineSeparator)
+    }
+  } catch (Exception e) {
+    println e
+
+  } finally {
+    // Close the writer
+    writer.close()
+  }
+  println "Lines exported to CSV file: ${csvFile}"
+
 
 }
 
@@ -115,6 +141,9 @@ class Globals {
 }
 
 
+
+
+
 //Unique Keys: [date, fat, weight, logId, time, source, bmi] across all of the json files.
 
 class WeightKeys {
@@ -128,7 +157,7 @@ class WeightKeys {
 
   static String toCsv() {
     // Build the CSV string with property values separated by commas
-    return "${logId}, ${date}, ${time}, ${weight}, ${bmi}, ${fat}, ${source}"
+    return "${logId},${date},${time},${weight},${bmi},${fat},${source}"
   }
 }
 
@@ -143,6 +172,6 @@ class WeightValue {
 
   String toCsv() {
     // Build the CSV string with property values separated by commas
-    return "${this.logId}, ${this.date}, ${this.time}, ${this.weight}, ${this.bmi}, ${this.fat}, ${this.source}"
+    return "${this.logId},${this.date},${this.time},${this.weight},${this.bmi},${this.fat},${this.source}"
   }
 }
